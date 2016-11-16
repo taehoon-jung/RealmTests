@@ -9,6 +9,9 @@
 #import "AppDelegate.h"
 #import "DetailViewController.h"
 
+#import <Realm/Realm.h>
+#import "Dog.h"
+
 @interface AppDelegate () <UISplitViewControllerDelegate>
 
 @end
@@ -22,7 +25,59 @@
     UINavigationController *navigationController = [splitViewController.viewControllers lastObject];
     navigationController.topViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
     splitViewController.delegate = self;
+    
+    
+    [self performMigration];
+    
     return YES;
+}
+
+- (void)performMigration {
+    
+    RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
+    config.schemaVersion = 4;
+    
+    config.migrationBlock = ^(RLMMigration *migration, uint64_t oldSchemeVersion) {
+        
+        if (oldSchemeVersion < 1) {
+            
+            [migration enumerateObjects:NSStringFromClass([Person class])
+                                  block:^(RLMObject * _Nullable oldObject, RLMObject * _Nullable newObject) {
+                                      
+                                      newObject[@"birthdate"] = [NSDate date];
+                                      
+                                  }];
+            
+        }
+        
+        if (oldSchemeVersion < 3) {
+            
+            [migration enumerateObjects:NSStringFromClass([Person class])
+                                  block:^(RLMObject * _Nullable oldObject, RLMObject * _Nullable newObject) {
+                                      
+                                      newObject[@"address"] = @"서울특별시 중구 을지로 65 SK T-타워";
+                                      
+                                  }];
+            
+        }
+        
+        if (oldSchemeVersion < 4) {
+            
+            __block NSInteger idx = 0;
+            [migration enumerateObjects:NSStringFromClass([Dog class])
+                                  block:^(RLMObject * _Nullable oldObject, RLMObject * _Nullable newObject) {
+                                      
+                                      NSLog(@"idx: %zd", idx);
+                                      newObject[@"idx"] = @(idx);
+                                      
+                                      idx++;
+                                      
+                                  }];
+            
+        }
+    };
+    
+    [RLMRealmConfiguration setDefaultConfiguration:config];
 }
 
 

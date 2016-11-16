@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+@class Dog;
 @interface DetailViewController : UIViewController
 
-@property (strong, nonatomic) NSDate *detailItem;
+@property (strong, nonatomic) Dog *detailItem;
 @property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
 
 @end
